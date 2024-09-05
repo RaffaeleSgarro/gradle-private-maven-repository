@@ -3,14 +3,14 @@
 The purpose of this project is to demonstrate how to create a DSL `mavenContoso()` to be used like this
 
 ```groovy
--- Inside vendor-html-theme/build.gradle
+// Inside vendor-html-theme/build.gradle
 publishing {
     repositories {
         mavenContoso()
     }
 }
 
--- Inside app1/build.gradle
+// Inside app1/build.gradle
 repositories {
     mavenContoso()
 }
