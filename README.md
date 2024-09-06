@@ -1,4 +1,4 @@
-# gradle-private-maven-repository
+# Private AWS CodeArtifact Maven repository in Gradle
 
 The purpose of this project is to demonstrate how to create a DSL `mavenContoso()` to be used like this
 
@@ -18,6 +18,8 @@ repositories {
 
 The `mavenContoso()` is a custom method that will be used to configure the repository. The password **is not**
 a static string but an expensive network call, so it should be called only once and only if needed.
+
+## How to run
 
 To create a CodeArtifact repository on AWS (you may want to set `AWS_PROFILE` or append `--profile=contoso` to the commands):
 ```shell
