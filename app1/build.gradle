@@ -3,5 +3,5 @@ plugins {
 }
 
 repositories {
-    mavenContoso()
+    // mavenContoso()
 }
