@@ -25,12 +25,12 @@ aws codeartifact create-domain --domain temporary
 aws codeartifact create-repository --domain temporary --repository m2
 ```
 
-**IMPORTANT** Get the repository endpoint like this (the `contoso.aws.profile` property is used to get the
-authentication token in `build.gradle` files):
+**IMPORTANT** Get the repository endpoint like this:
 ```shell
  aws codeartifact get-repository-endpoint --domain temporary --repository m2 --format maven
 ```
-and put in `GRADLE_USER_HOME/gradle.properties`
+and put in `GRADLE_USER_HOME/gradle.properties` (the `contoso.aws.profile` property is used to get an
+authentication token via the AWS CLI in `build.gradle` files)
 ```properties
 contoso.m2.endpoint=https://temporary-123456789.d.codeartifact.eu-central-1.amazonaws.com/maven/m2/
 contoso.aws.profile=contoso
