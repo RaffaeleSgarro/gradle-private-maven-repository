@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'contoso'
     id 'maven-publish'
 }
 
@@ -8,18 +9,12 @@ publishing {
         maven(MavenPublication) {
             groupId = 'contoso'
             artifactId = 'vendor-html-theme'
-            version = '1.0'
+            version = '1.1.0'
             from components.java
         }
     }
 
     repositories {
-        maven {
-            url project.property('contoso.m2.endpoint')
-            credentials {
-                username = 'aws'
-                password = "aws codeartifact get-authorization-token --domain temporary --query authorizationToken --output text --profile ${property('contoso.aws.profile')}".execute().getText()
-            }
-        }
+        contoso.codeArtifact()
     }
 }
