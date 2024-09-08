@@ -20,7 +20,7 @@ abstract class ContosoMavenExtension {
             url endpoint
             credentials {
                 username = 'aws'
-                password = "aws codeartifact get-authorization-token --domain temporary --query authorizationToken --output text --profile ${ awsProfile}".execute().getText()
+                password = "aws codeartifact get-authorization-token --domain temporary --query authorizationToken --output text --profile ${awsProfile}".execute().getText()
             }
         }
     }
