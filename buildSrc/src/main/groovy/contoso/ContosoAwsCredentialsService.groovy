@@ -1,5 +1,9 @@
 package contoso
 
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.services.codeartifact.AWSCodeArtifactAsyncClient
+import com.amazonaws.services.codeartifact.model.GetAuthorizationTokenRequest
+import com.amazonaws.services.codeartifact.model.GetAuthorizationTokenResult
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
@@ -10,26 +14,28 @@ abstract class ContosoAwsCredentialsService implements BuildService<Parameters> 
 
     private static final Logger logger = Logging.getLogger(ContosoAwsCredentialsService)
 
-    private String cachedToken
+    private GetAuthorizationTokenResult cachedResponse
 
     synchronized String getAccessToken() {
-        if ((cachedToken == null) || cachedAccessTokenExpired) {
-            cachedToken = freshAccessTokenWithAwsSdk
+        if (cachedResponse == null || cachedResponse.expiration.before(new Date())) {
+            refreshAccessTokenWithAwsSdk()
         }
-        return cachedToken
+        return cachedResponse.authorizationToken
     }
 
-    private boolean isCachedAccessTokenExpired() {
-        return false
-    }
-
-    private String getFreshAccessTokenWithAwsSdk() {
-        def awsProfile = parameters.awsProfile.get()
-        logger.quiet("Requesting fresh AWS credentials with profile ${awsProfile}...")
-        return "aws codeartifact get-authorization-token --domain temporary --query authorizationToken --output text --profile ${awsProfile}".execute().getText()
+    private void refreshAccessTokenWithAwsSdk() {
+        logger.quiet("Requesting fresh AWS credentials...")
+        cachedResponse = AWSCodeArtifactAsyncClient.builder()
+                .withRegion(parameters.awsRegion.get())
+                .withCredentials(new ProfileCredentialsProvider(parameters.awsProfile.get()))
+                .build()
+                .getAuthorizationToken(new GetAuthorizationTokenRequest()
+                        .withDomain(parameters.codeArtifactDomain.get()))
     }
 
     interface Parameters extends BuildServiceParameters {
         Property<String> getAwsProfile()
+        Property<String> getAwsRegion()
+        Property<String> getCodeArtifactDomain()
     }
 }

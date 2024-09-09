@@ -16,6 +16,8 @@ abstract class ContosoGradlePlugin implements Plugin<Project> {
         def contosoAwsCredentials =  sharedServices.registerIfAbsent("contosoAwsCredentials", ContosoAwsCredentialsService) {
             parameters {
                 awsProfile = project.property('contoso.aws.profile')
+                awsRegion = project.property('contoso.aws.region')
+                codeArtifactDomain = project.property('contoso.codeartifact.domain')
             }
         }
         project.repositories.extensions.create("contoso", ContosoMavenExtension, project.repositories, project, contosoAwsCredentials)
