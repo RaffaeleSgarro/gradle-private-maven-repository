@@ -3,5 +3,5 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.amazonaws:aws-java-sdk-codeartifact:1.12.771'
+    implementation 'software.amazon.awssdk:codeartifact:2.27.21'
 }

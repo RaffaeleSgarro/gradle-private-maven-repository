@@ -1,36 +1,40 @@
 package contoso
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.services.codeartifact.AWSCodeArtifactAsyncClient
-import com.amazonaws.services.codeartifact.model.GetAuthorizationTokenRequest
-import com.amazonaws.services.codeartifact.model.GetAuthorizationTokenResult
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.codeartifact.CodeartifactClient
+import software.amazon.awssdk.services.codeartifact.model.GetAuthorizationTokenResponse
+
+import java.time.Instant
 
 abstract class ContosoAwsCredentialsService implements BuildService<Parameters> {
 
     private static final Logger logger = Logging.getLogger(ContosoAwsCredentialsService)
 
-    private GetAuthorizationTokenResult cachedResponse
+    private GetAuthorizationTokenResponse cachedResponse
 
     synchronized String getAccessToken() {
-        if (cachedResponse == null || cachedResponse.expiration.before(new Date())) {
+        if (cachedResponse == null || cachedResponse.expiration().isBefore(Instant.now())) {
             refreshAccessTokenWithAwsSdk()
         }
-        return cachedResponse.authorizationToken
+        return cachedResponse.authorizationToken()
     }
 
     private void refreshAccessTokenWithAwsSdk() {
         logger.quiet("Requesting fresh AWS credentials...")
-        cachedResponse = AWSCodeArtifactAsyncClient.builder()
-                .withRegion(parameters.awsRegion.get())
-                .withCredentials(new ProfileCredentialsProvider(parameters.awsProfile.get()))
+
+        cachedResponse = CodeartifactClient.builder()
+                .region(Region.of(parameters.awsRegion.get()))
+                .credentialsProvider(ProfileCredentialsProvider.create(parameters.awsProfile.get()))
                 .build()
-                .getAuthorizationToken(new GetAuthorizationTokenRequest()
-                        .withDomain(parameters.codeArtifactDomain.get()))
+                .getAuthorizationToken { req ->
+                    req.domain(parameters.codeArtifactDomain.get())
+                }
     }
 
     interface Parameters extends BuildServiceParameters {
